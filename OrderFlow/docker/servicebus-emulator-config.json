@@ -1,0 +1,24 @@
+{
+  "UserConfig": {
+    "Namespaces": [
+      {
+        "Name": "sbemulatorns",
+        "Topics": [
+          {
+            "Name": "orderflow-events",
+            "Properties": {
+              "DefaultMessageTimeToLive": "PT1H",
+              "RequiresDuplicateDetection": false
+            },
+            "Subscriptions": [
+              { "Name": "orders",    "Properties": { "DeadLetteringOnMessageExpiration": true, "MaxDeliveryCount": 5 } },
+              { "Name": "payments",  "Properties": { "DeadLetteringOnMessageExpiration": true, "MaxDeliveryCount": 5 } },
+              { "Name": "inventory", "Properties": { "DeadLetteringOnMessageExpiration": true, "MaxDeliveryCount": 5 } }
+            ]
+          }
+        ]
+      }
+    ],
+    "Logging": { "Type": "File" }
+  }
+}

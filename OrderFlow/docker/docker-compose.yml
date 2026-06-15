@@ -1,0 +1,100 @@
+# Full production-style stack: SQL Server, Redis, the Azure Service Bus emulator,
+# and the three OrderFlow services built with EnableCloud=true.
+#
+# Run:   docker compose -f docker/docker-compose.yml up --build
+#
+# Notes:
+# - The Azure Service Bus emulator requires accepting its EULA via the
+#   ACCEPT_EULA env var and a config.json that declares the topic/subscriptions.
+#   See docker/servicebus-emulator-config.json.
+# - The emulator depends on SQL Server (it stores state there).
+# - Each service uses its own Service Bus subscription on the shared topic via
+#   Providers:Subscription so every service receives the events it handles.
+
+name: orderflow
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Your_strong_Pass123"
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P Your_strong_Pass123 -No -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  servicebus:
+    image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      ACCEPT_EULA: "Y"
+      SQL_SERVER: sqlserver
+      MSSQL_SA_PASSWORD: "Your_strong_Pass123"
+    ports:
+      - "5672:5672"
+    volumes:
+      - ./servicebus-emulator-config.json:/ServiceBus_Emulator/ConfigFiles/Config.json:ro
+
+  orders:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.OrderService
+    depends_on: [sqlserver, redis, servicebus]
+    ports:
+      - "5001:8080"
+    environment:
+      Providers__Bus: ServiceBus
+      Providers__Cache: Redis
+      Providers__Storage: SqlServer
+      Providers__Subscription: orders
+      ConnectionStrings__SqlServer: "Server=sqlserver,1433;Database=OrderFlow;User Id=sa;Password=Your_strong_Pass123;TrustServerCertificate=True;"
+      ConnectionStrings__Redis: "redis:6379"
+      ConnectionStrings__ServiceBus: "Endpoint=sb://servicebus;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
+
+  payments:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.PaymentService
+    depends_on: [sqlserver, redis, servicebus]
+    ports:
+      - "5002:8080"
+    environment:
+      Providers__Bus: ServiceBus
+      Providers__Cache: Redis
+      Providers__Storage: SqlServer
+      Providers__Subscription: payments
+      ConnectionStrings__SqlServer: "Server=sqlserver,1433;Database=OrderFlow;User Id=sa;Password=Your_strong_Pass123;TrustServerCertificate=True;"
+      ConnectionStrings__Redis: "redis:6379"
+      ConnectionStrings__ServiceBus: "Endpoint=sb://servicebus;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
+
+  inventory:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.InventoryService
+    depends_on: [sqlserver, redis, servicebus]
+    ports:
+      - "5003:8080"
+    environment:
+      Providers__Bus: ServiceBus
+      Providers__Cache: Redis
+      Providers__Storage: SqlServer
+      Providers__Subscription: inventory
+      ConnectionStrings__SqlServer: "Server=sqlserver,1433;Database=OrderFlow;User Id=sa;Password=Your_strong_Pass123;TrustServerCertificate=True;"
+      ConnectionStrings__Redis: "redis:6379"
+      ConnectionStrings__ServiceBus: "Endpoint=sb://servicebus;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"

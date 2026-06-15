@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <!-- Requires NuGet (xUnit) so this project is excluded from the offline dev
+         build. Run with: dotnet test (after restoring packages). -->
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\OrderFlow.Contracts\OrderFlow.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\OrderFlow.Platform\OrderFlow.Platform.csproj" />
+    <ProjectReference Include="..\..\src\OrderFlow.OrderService\OrderFlow.OrderService.csproj" />
+    <ProjectReference Include="..\..\src\OrderFlow.PaymentService\OrderFlow.PaymentService.csproj" />
+    <ProjectReference Include="..\..\src\OrderFlow.InventoryService\OrderFlow.InventoryService.csproj" />
+  </ItemGroup>
+</Project>

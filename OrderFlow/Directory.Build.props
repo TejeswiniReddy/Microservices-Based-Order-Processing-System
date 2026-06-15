@@ -1,0 +1,31 @@
+<Project>
+
+  <!--
+    Shared build settings for every project in the solution.
+
+    EnableCloud toggles the production infrastructure (Redis, Azure Service Bus,
+    SQL Server via EF Core). It is OFF by default so the whole system compiles
+    and runs with zero external dependencies / NuGet packages (in-memory
+    providers). docker-compose and CI builds turn it on with:
+
+        dotnet build -p:EnableCloud=true
+
+    When EnableCloud=true the CLOUD compilation symbol is defined and the
+    services add a project reference to OrderFlow.Infrastructure.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <EnableCloud Condition="'$(EnableCloud)' == ''">false</EnableCloud>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(EnableCloud)' == 'true'">
+    <DefineConstants>$(DefineConstants);CLOUD</DefineConstants>
+  </PropertyGroup>
+
+</Project>

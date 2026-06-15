@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>OrderFlow.Infrastructure</RootNamespace>
+    <!-- Production adapters: Redis, Azure Service Bus, EF Core + SQL Server.
+         Only referenced when building with -p:EnableCloud=true. Requires NuGet
+         restore (api.nuget.org), so it is excluded from the offline dev build. -->
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.18.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.8" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OrderFlow.Contracts\OrderFlow.Contracts.csproj" />
+    <ProjectReference Include="..\OrderFlow.Platform\OrderFlow.Platform.csproj" />
+  </ItemGroup>
+</Project>

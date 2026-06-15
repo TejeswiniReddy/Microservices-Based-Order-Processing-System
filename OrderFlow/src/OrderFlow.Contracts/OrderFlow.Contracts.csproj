@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>OrderFlow.Contracts</RootNamespace>
+  </PropertyGroup>
+</Project>
