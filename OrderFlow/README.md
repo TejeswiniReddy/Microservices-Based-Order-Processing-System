@@ -4,7 +4,7 @@ A distributed **.NET 8** order-processing backend built around an event-driven
 **saga**. Three services — **Order**, **Payment**, and **Inventory** —
 coordinate an asynchronous purchase workflow over a message bus, with
 **Redis** caching, **JWT authentication + role-based access control (RBAC)**,
-and **SQL Server** persistence. It runs end-to-end on your machine with **zero
+and **SQL Server** persistence. It runs end-to-end on machine with **zero
 external dependencies**, and swaps in **Azure Service Bus**, **Redis**, and
 **EF Core / SQL Server** for production via a single build flag.
 
@@ -26,9 +26,7 @@ Every cross-service concern is coded against an interface in
 | Payment storage| `IPaymentRepository`   | concurrent dictionary | EF Core + SQL Server                             |
 | Inventory storage | `IInventoryRepository` | concurrent dictionary | EF Core + SQL Server (serializable + rowversion) |
 
-The **service and business logic never change** between dev and production —
-only the registered providers do. That means the saga, auth, and caching logic
-you can run and test locally is the exact same code that runs in the cloud.
+
 
 ---
 
